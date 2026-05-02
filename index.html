@@ -288,7 +288,7 @@
         } else if (dragX < -100) {
           handleSwipe('left');  
         } else if (Math.abs(dragX) < 10) {
-          setIsFlipped(!isFlipped); 
+          setIsFlipped(prev => !prev); 
         }
         setDragStartX(null);
         setDragX(0);
@@ -531,23 +531,36 @@
                   transform: `translateX(${dragX}px) rotate(${rotate}deg) rotateY(${isFlipped ? 180 : 0}deg)`,
                   opacity: isDragging ? opacity : 1
                 }}
-                onMouseDown={handleDragStart}
-                onMouseMove={handleDragMove}
-                onMouseUp={handleDragEnd}
-                onMouseLeave={handleDragEnd}
-                onTouchStart={handleDragStart}
-                onTouchMove={handleDragMove}
-                onTouchEnd={handleDragEnd}
               >
-                {/* [버그 수정 완료] pointer-events-none 추가하여 클릭 간섭 제거 */}
+                {/* 투명 방패 레이어: 모든 마우스/터치 이벤트를 이 레이어에서 독점하여 자식 요소 간섭 방지 */}
+                <div 
+                  className="absolute inset-0 z-50 rounded-3xl"
+                  onMouseDown={handleDragStart}
+                  onMouseMove={handleDragMove}
+                  onMouseUp={handleDragEnd}
+                  onMouseLeave={handleDragEnd}
+                  onTouchStart={handleDragStart}
+                  onTouchMove={handleDragMove}
+                  onTouchEnd={handleDragEnd}
+                ></div>
+
+                {/* 앞면 콘텐츠 */}
                 <div className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center p-8 text-center backface-hidden pointer-events-none ${isFlipped ? 'opacity-0' : 'opacity-100'}`} style={{ transform: 'rotateY(0deg)', backfaceVisibility: 'hidden' }}>
-                  <div className="mb-4 text-indigo-200 text-4xl animate-bounce">👆</div>
+                  {/* 은은한 점선 테두리 애니메이션 */}
+                  <div className="absolute inset-3 border-2 border-dashed border-indigo-200/60 rounded-2xl animate-pulse"></div>
+                  
                   <h2 className="text-5xl font-black text-gray-800 tracking-widest mb-4">{currentCard.word}</h2>
                   <p className="text-2xl text-gray-400 tracking-[0.5em]">{currentCard.hanja}</p>
-                  <p className="absolute bottom-6 text-xs text-gray-300 font-bold">터치하여 뜻 확인 / 좌우로 밀어 넘기기</p>
+                  
+                  <p className="absolute bottom-8 text-xs text-indigo-400 font-bold bg-indigo-50/80 px-4 py-2 rounded-full shadow-sm">
+                    가볍게 터치하여 뒤집기
+                  </p>
                 </div>
 
+                {/* 뒷면 콘텐츠 */}
                 <div className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center p-6 text-center backface-hidden pointer-events-none ${isFlipped ? 'opacity-100' : 'opacity-0'}`} style={{ transform: 'rotateY(180deg)', backfaceVisibility: 'hidden' }}>
+                  <div className="absolute inset-3 border-2 border-dashed border-indigo-200/60 rounded-2xl"></div>
+
                   <h3 className="text-xl font-bold text-indigo-900 mb-2">{currentCard.word}</h3>
                   <p className="text-lg text-gray-700 leading-relaxed mb-6 font-medium break-keep">
                     "{currentCard.meaning}"
